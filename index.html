@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Quy trình Tạm ứng / Hoàn ứng CTS Vina</title>
+<style>
+  :root{
+    --primary:#1a56db; --primary-dark:#1240a8; --bg:#f3f5f9; --card:#fff;
+    --border:#e2e6ee; --text:#1f2937; --muted:#6b7280;
+    --green:#047857; --green-bg:#ecfdf5; --red:#b91c1c; --red-bg:#fef2f2;
+    --amber:#b45309; --amber-bg:#fffbeb; --blue-bg:#eff6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  body{background:var(--bg);color:var(--text);font-size:14px}
+  header{background:var(--primary);color:#fff;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:17px;font-weight:600}
+  header .badge{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:999px;font-size:12px}
+  .role-switch{margin-left:auto;display:flex;gap:0;border:1px solid rgba(255,255,255,.5);border-radius:8px;overflow:hidden}
+  .role-switch button{background:transparent;color:#fff;border:0;padding:7px 16px;cursor:pointer;font-size:13px}
+  .role-switch button.active{background:#fff;color:var(--primary);font-weight:600}
+  nav.tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto}
+  nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 16px;cursor:pointer;font-size:14px;color:var(--muted);white-space:nowrap}
+  nav.tabs button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  main{padding:20px 24px;max-width:1280px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:15px;margin-bottom:12px}
+  .card h3{font-size:14px;margin-bottom:8px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+  .filters label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  select,input[type=text],input[type=date],input[type=number],input[type=email],textarea{
+    border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;background:#fff;min-width:140px}
+  textarea{width:100%;min-height:80px}
+  .btn{border:0;border-radius:7px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}
+  .btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+  .btn-sm{padding:4px 10px;font-size:12px}
+  table{width:100%;border-collapse:collapse}
+  th{background:#f8fafc;text-align:left;padding:9px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .tag-green{background:var(--green-bg);color:var(--green)}
+  .tag-red{background:var(--red-bg);color:var(--red)}
+  .tag-amber{background:var(--amber-bg);color:var(--amber)}
+  .tag-blue{background:var(--blue-bg);color:var(--primary)}
+  .tag-gray{background:#f1f5f9;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .kpi .label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .kpi .value{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .kpi.hl{border-color:var(--primary);background:var(--blue-bg)}
+  .note{background:var(--amber-bg);border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--amber);margin-bottom:14px}
+  .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .switch{position:relative;width:42px;height:22px;flex:none}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;cursor:pointer;transition:.2s}
+  .slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked + .slider{background:var(--primary)}
+  .switch input:checked + .slider:before{transform:translateX(20px)}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .form-grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 16px}
+  .modal-backdrop.open{display:flex}
+  .modal{background:#fff;border-radius:12px;max-width:760px;width:100%;padding:22px}
+  .modal h2{font-size:16px;margin-bottom:14px}
+  .modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+  .steps{display:flex;gap:8px;margin-bottom:16px;font-size:12px}
+  .steps span{padding:4px 12px;border-radius:999px;background:#f1f5f9;color:var(--muted)}
+  .steps span.on{background:var(--primary);color:#fff}
+  .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text)}
+  .summary-box{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px}
+  .summary-box .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+  .summary-box .row.total{border-top:1px dashed var(--border);margin-top:6px;padding-top:8px;font-weight:700}
+  .muted{color:var(--muted);font-size:12px}
+  a{color:var(--primary)}
+  .log-item{padding:8px 0;border-bottom:1px dashed var(--border);font-size:12.5px}
+  .log-item time{color:var(--muted);margin-right:8px}
+  .toast{position:fixed;bottom:20px;right:20px;background:#064e3b;color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;z-index:99;display:none}
+  .mockup-banner{background:#111827;color:#9ca3af;text-align:center;font-size:11.5px;padding:4px}
+  .emp-only,.acc-only{display:none}
+  body.role-acc .acc-only{display:block}
+  body.role-emp .emp-only{display:block}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ml-auto{margin-left:auto}
+</style>
+</head>
+<body class="role-acc">
+<div class="mockup-banner">MOCKUP TĨNH — dữ liệu minh họa, chưa kết nối CSDL / Google Sheet / Email Mắt Bão</div>
+<header>
+  <h1>CTS Vina — Tạm ứng · Hoàn ứng / Giải trình</h1>
+  <span class="badge" id="roleBadge">Vai trò: Kế toán</span>
+  <div class="role-switch">
+    <button id="btnRoleAcc" class="active" onclick="setRole('acc')">Kế toán</button>
+    <button id="btnRoleEmp" onclick="setRole('emp')">Nhân viên (Nguyễn Văn An)</button>
+  </div>
+</header>
+
+<!-- ===================== TABS KẾ TOÁN ===================== -->
+<div class="acc-only">
+<nav class="tabs" id="accTabs">
+  <button class="active" data-panel="p-chi">Khoản chi</button>
+  <button data-panel="p-tu">Tạm ứng</button>
+  <button data-panel="p-so">Sổ thu chi / Số dư</button>
+  <button data-panel="p-dnhu">ĐNHƯ đã tạo</button>
+  <button data-panel="p-danhmuc">Danh mục</button>
+  <button data-panel="p-log">Lịch sử / Log</button>
+</nav>
+<main>
+
+  <!-- ---- Tab Khoản chi ---- -->
+  <section class="panel active" id="p-chi">
+    <div class="flex" style="margin-bottom:14px">
+      <h2 style="font-size:16px">Khoản chi</h2>
+      <button class="btn btn-primary ml-auto" onclick="openDNHU()">＋ Tạo ĐNHƯ</button>
+    </div>
+    <div class="card">
+      <h3>Nhập khoản chi mới</h3>
+      <div class="form-grid">
+        <label>Ngày chi<input type="date" value="2026-11-07"></label>
+        <label>Nhân viên<select><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+        <label>Dự án<select><option>Nhà máy ABC – Bắc Ninh</option><option>Kho XYZ – Hải Phòng</option></select></label>
+        <label>Nội dung chi<input type="text" placeholder="VD: Mua vật tư phụ"></label>
+        <label>Số tiền (VNĐ)<input type="number" placeholder="0"></label>
+        <label>Hồ sơ chứng từ<select><option>Đủ hồ sơ</option><option>Thiếu hóa đơn</option><option>Thiếu phiếu chi</option><option>Thiếu báo giá</option></select></label>
+        <label>Duyệt<select><option>Duyệt</option><option>Từ chối</option></select></label>
+      </div>
+      <div style="margin-top:12px"><button class="btn btn-primary" onclick="toast('(Mockup) Đã lưu khoản chi — sổ thu chi KHÔNG đổi vì khoản chưa giải trình')">Lưu khoản chi</button></div>
+    </div>
+    <div class="card">
+      <div class="filters">
+        <label>Nhân viên<select id="fChiNV" onchange="renderChi()"><option value="">Tất cả</option><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+        <label>Dự án<select><option>Tất cả</option><option>Nhà máy ABC – Bắc Ninh</option><option>Kho XYZ – Hải Phòng</option></select></label>
+        <label>Từ ngày<input type="date" value="2026-10-01"></label>
+        <label>Đến ngày<input type="date" value="2026-11-07"></label>
+        <label>Giải trình<select><option>Tất cả</option><option>Chưa giải trình</option><option>Đã giải trình</option></select></label>
+      </div>
+      <table>
+        <thead><tr><th>Mã</th><th>Ngày</th><th>Nhân viên</th><th>Dự án</th><th>Nội dung</th><th class="num">Số tiền</th><th>Hồ sơ</th><th>Duyệt</th><th>Giải trình</th></tr></thead>
+        <tbody id="tbChi"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ---- Tab Tạm ứng ---- -->
+  <section class="panel" id="p-tu">
+    <div class="card">
+      <h3>Nhập tạm ứng mới</h3>
+      <div class="form-grid">
+        <label>Ngày tạm ứng<input type="date" value="2026-11-07"></label>
+        <label>Nhân viên<select><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+        <label>Số tiền (VNĐ)<input type="number" placeholder="0"></label>
+        <label>Ghi chú<input type="text" placeholder="VD: Ứng đợt 2 dự án ABC"></label>
+      </div>
+      <div style="margin-top:12px"><button class="btn btn-primary" onclick="toast('(Mockup) Đã lưu tạm ứng ở trạng thái CHƯA ghi sổ')">Lưu tạm ứng</button></div>
+      <p class="muted" style="margin-top:8px">Tạm ứng mới mặc định <b>Chưa ghi sổ</b>. Ghi sổ là thao tác riêng, có xác nhận và lưu vết.</p>
+    </div>
+    <div class="card">
+      <div class="filters">
+        <label>Nhân viên<select><option>Tất cả</option><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+        <label>Từ ngày<input type="date" value="2026-10-01"></label>
+        <label>Đến ngày<input type="date" value="2026-11-07"></label>
+        <label>Ghi sổ<select><option>Tất cả</option><option>Đã ghi sổ</option><option>Chưa ghi sổ</option></select></label>
+      </div>
+      <table>
+        <thead><tr><th>Mã</th><th>Ngày</th><th>Nhân viên</th><th class="num">Số tiền</th><th>Ghi chú</th><th>Ghi sổ</th><th></th></tr></thead>
+        <tbody id="tbTU"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ---- Tab Sổ thu chi ---- -->
+  <section class="panel" id="p-so">
+    <div class="note">⚠ Hai chế độ xem cho ra <b>hai số dư khác nhau</b> nên được đặt tên riêng:
+      <b>“Số dư thực tế”</b> (tính mọi tạm ứng, kể cả chưa ghi sổ) và <b>“Số dư đã ghi sổ”</b> (chỉ tính tạm ứng đã ghi sổ — trùng nguyên tắc tính Số dư trong ĐNHƯ).</div>
+    <div class="toggle-row card" style="margin-bottom:16px">
+      <label class="switch"><input type="checkbox" id="toggleGhiSo" onchange="renderSo()"><span class="slider"></span></label>
+      <div>
+        <b id="toggleLabel">Đang xem: Số dư thực tế (toàn bộ tạm ứng)</b>
+        <div class="muted">Bật toggle để chuyển sang chế độ chỉ tính tạm ứng <b>đã ghi sổ</b> — dùng để đối chiếu với Số dư trong ĐNHƯ.</div>
+      </div>
+      <label class="ml-auto">Nhân viên <select id="fSoNV" onchange="renderSo()"><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+    </div>
+    <div class="kpis" id="soKpis"></div>
+    <div class="card">
+      <h3 id="soTitle"></h3>
+      <p class="muted" style="margin-bottom:10px">Khoản chi chỉ vào sổ khi <b>đã giải trình</b> (thuộc một ĐNHƯ). Sổ tự cập nhật theo thời gian thực — không còn nút “cập nhật sổ” thủ công.</p>
+      <table>
+        <thead><tr><th>Ngày</th><th>Diễn giải</th><th>Loại</th><th class="num">Tạm ứng vào</th><th class="num">Chi ra</th><th class="num">Số dư lũy kế</th></tr></thead>
+        <tbody id="tbSo"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ---- Tab ĐNHƯ ---- -->
+  <section class="panel" id="p-dnhu">
+    <div class="flex" style="margin-bottom:14px">
+      <h2 style="font-size:16px">Đề nghị hoàn ứng / giải trình đã tạo</h2>
+      <button class="btn btn-primary ml-auto" onclick="openDNHU()">＋ Tạo ĐNHƯ</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Nhân viên</th><th>Kỳ</th><th class="num">Tổng hoàn ứng</th><th class="num">Số tạm ứng trước</th><th class="num">Số dư tạm ứng</th><th>Trạng thái</th><th>File</th><th></th></tr></thead>
+        <tbody id="tbDNHU"></tbody>
+      </table>
+      <p class="muted" style="margin-top:10px">Hủy ĐNHƯ ⇒ các khoản chi thuộc ĐNHƯ đó quay về <b>Chưa giải trình</b>, ĐNHƯ giữ lại ở trạng thái “Đã hủy” để lưu vết kiểm toán.</p>
+    </div>
+  </section>
+
+  <!-- ---- Tab Danh mục ---- -->
+  <section class="panel" id="p-danhmuc">
+    <div class="card">
+      <div class="flex"><h3>Nhân viên</h3><button class="btn btn-outline btn-sm ml-auto" onclick="toast('(Mockup) Mở form thêm nhân viên')">＋ Thêm NV</button></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Mã</th><th>Họ tên</th><th>Email</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>NV01</td><td>Nguyễn Văn An</td><td>an.nguyen@ctsvina.vn</td><td><span class="tag tag-green">Đang làm việc</span></td><td><button class="btn btn-outline btn-sm">Sửa</button></td></tr>
+          <tr><td>NV02</td><td>Trần Bình</td><td>binh.tran@ctsvina.vn</td><td><span class="tag tag-green">Đang làm việc</span></td><td><button class="btn btn-outline btn-sm">Sửa</button></td></tr>
+          <tr><td>NV03</td><td>Lê Văn Cường</td><td>cuong.le@ctsvina.vn</td><td><span class="tag tag-green">Đang làm việc</span></td><td><button class="btn btn-outline btn-sm">Sửa</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="flex"><h3>Dự án</h3><button class="btn btn-outline btn-sm ml-auto" onclick="toast('(Mockup) Mở form thêm dự án')">＋ Thêm dự án</button></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Mã</th><th>Tên dự án</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>DA01</td><td>Nhà máy ABC – Bắc Ninh</td><td><span class="tag tag-green">Đang chạy</span></td><td><button class="btn btn-outline btn-sm">Sửa</button></td></tr>
+          <tr><td>DA02</td><td>Kho XYZ – Hải Phòng</td><td><span class="tag tag-gray">Tạm dừng</span></td><td><button class="btn btn-outline btn-sm">Sửa</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ---- Tab Log ---- -->
+  <section class="panel" id="p-log">
+    <div class="card">
+      <h3>Lịch sử thao tác (lưu vết Ghi sổ / Giải trình / ĐNHƯ)</h3>
+      <div id="logList"></div>
+    </div>
+  </section>
+</main>
+</div>
+
+<!-- ===================== GIAO DIỆN NHÂN VIÊN ===================== -->
+<div class="emp-only">
+<nav class="tabs" id="empTabs">
+  <button class="active" data-panel="e-so">Thu chi của tôi</button>
+  <button data-panel="e-dnhu">ĐNHƯ của tôi</button>
+</nav>
+<main>
+  <section class="panel active" id="e-so">
+    <div class="note">Bạn chỉ xem được dữ liệu của chính mình. Chi tiết khoản chi chỉ hiển thị <b>sau khi đã được đưa vào một ĐNHƯ (đã giải trình)</b>.</div>
+    <div class="kpis">
+      <div class="kpi"><div class="label">Tổng tạm ứng đã ghi sổ</div><div class="value">10.000.000 ₫</div></div>
+      <div class="kpi"><div class="label">Tổng chi đã giải trình</div><div class="value">2.500.000 ₫</div></div>
+      <div class="kpi hl"><div class="label">Số dư đã ghi sổ</div><div class="value">7.500.000 ₫</div></div>
+    </div>
+    <div class="card">
+      <div class="filters">
+        <label>Dự án<select><option>Tất cả</option><option>Nhà máy ABC – Bắc Ninh</option></select></label>
+        <label>Từ ngày<input type="date" value="2026-10-01"></label>
+        <label>Đến ngày<input type="date" value="2026-11-07"></label>
+      </div>
+      <table>
+        <thead><tr><th>Ngày</th><th>Diễn giải</th><th class="num">Tạm ứng vào</th><th class="num">Chi ra</th><th class="num">Số dư</th></tr></thead>
+        <tbody>
+          <tr><td>01/10/2026</td><td>Tạm ứng đợt 1 (TU001)</td><td class="num">10.000.000</td><td class="num">—</td><td class="num">10.000.000</td></tr>
+          <tr><td>05/10/2026</td><td>Thuê xe cẩu (đã giải trình — ĐNHƯ-2026-01)</td><td class="num">—</td><td class="num">2.500.000</td><td class="num">7.500.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" id="e-dnhu">
+    <div class="flex" style="margin-bottom:14px">
+      <h2 style="font-size:16px">Đề nghị hoàn ứng của tôi</h2>
+      <button class="btn btn-primary ml-auto" onclick="openDNTU()">＋ Tạo Đề nghị tạm ứng (ĐNTƯ)</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Kỳ</th><th class="num">Tổng hoàn ứng</th><th>Trạng thái</th><th>File</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td>ĐNHƯ-2026-01</td><td>Giải trình chi phí T9–T10/2026</td><td>01/09 – 10/10</td>
+            <td class="num">2.500.000</td><td><span class="tag tag-green">Đã gửi</span></td>
+            <td><a href="#" onclick="toast('(Mockup) Mở file / thư mục Drive chứa ĐNHƯ');return false">Xem / tải</a></td>
+            <td><button class="btn btn-outline btn-sm" onclick="openEmail('ĐNHƯ-2026-01')">Gửi email</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</div>
+
+<!-- ===================== MODAL TẠO ĐNHƯ (wizard 2 bước) ===================== -->
+<div class="modal-backdrop" id="mdDNHU">
+  <div class="modal">
+    <h2>Tạo Đề nghị hoàn ứng / giải trình</h2>
+    <div class="steps"><span class="on" id="st1">1 · Thiết lập</span><span id="st2">2 · Xem trước &amp; xác nhận</span></div>
+
+    <div id="dnhuStep1">
+      <div class="form-grid">
+        <label>Nhân viên<select id="dnhuNV"><option>Nguyễn Văn An</option><option>Trần Bình</option><option>Lê Văn Cường</option></select></label>
+        <label>Từ ngày<input type="date" value="2026-10-11" id="dnhuFrom"></label>
+        <label>Đến ngày<input type="date" value="2026-11-07" id="dnhuTo"></label>
+        <label>Tiêu đề ĐNHƯ<input type="text" value="Giải trình chi phí T10–T11/2026" id="dnhuTitle" style="min-width:220px"></label>
+        <label>Loại file xuất<select id="dnhuType"><option>Excel (.xlsx)</option><option>HTML</option></select></label>
+        <label>Nơi xuất<select id="dnhuDest"><option>Google Drive (theo cây thư mục)</option><option>Tải về máy</option></select></label>
+      </div>
+      <div class="checkbox-row" style="margin-top:12px">
+        <input type="checkbox" id="dnhuRejected">
+        <label for="dnhuRejected">Gộp cả khoản <b>Từ chối</b> (chỉ liệt kê tham khảo, <b>không</b> cộng vào tổng hoàn ứng)</label>
+      </div>
+      <div class="actions"><button class="btn btn-outline" onclick="closeModal('mdDNHU')">Hủy</button>
+        <button class="btn btn-primary" onclick="dnhuPreview()">Xem trước số liệu →</button></div>
+    </div>
+
+    <div id="dnhuStep2" style="display:none">
+      <p class="muted">Chỉ các khoản <b>chưa giải trình</b> trong kỳ được lấy. Kiểm tra số liệu trước khi chốt — sau khi xuất file thành công, các khoản dưới đây sẽ được đánh dấu <b>Đã giải trình</b>.</p>
+      <table style="margin-top:10px">
+        <thead><tr><th>Ngày</th><th>Nội dung</th><th>Duyệt</th><th class="num">Số tiền</th></tr></thead>
+        <tbody id="dnhuPrevRows"></tbody>
+      </table>
+      <div class="summary-box" id="dnhuSummary"></div>
+      <div class="actions">
+        <button class="btn btn-outline" onclick="dnhuBack()">← Sửa thiết lập</button>
+        <button class="btn btn-primary" onclick="dnhuConfirm()">✓ Xác nhận tạo &amp; xuất file</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL GỬI EMAIL ===================== -->
+<div class="modal-backdrop" id="mdEmail">
+  <div class="modal">
+    <h2>Gửi email qua Mắt Bão Email Pro</h2>
+    <div class="form-grid">
+      <label>Từ<input type="email" value="an.nguyen@ctsvina.vn" readonly></label>
+      <label>Đến<input type="email" value="ketoan@ctsvina.vn"></label>
+      <label style="grid-column:1/-1">Tiêu đề<input type="text" id="emailSubject" style="min-width:100%"></label>
+    </div>
+    <label class="muted" style="display:block;margin-top:10px">Nội dung
+      <textarea>Kính gửi phòng Kế toán,
+
+Em gửi file đề nghị hoàn ứng kèm theo email này. Nhờ anh/chị kiểm tra và xác nhận giúp em.
+
+Trân trọng,
+Nguyễn Văn An</textarea></label>
+    <p class="muted" style="margin-top:8px">📎 Đính kèm: <span id="emailAttach"></span> (tự đính kèm từ hệ thống)</p>
+    <div class="actions"><button class="btn btn-outline" onclick="closeModal('mdEmail')">Hủy</button>
+      <button class="btn btn-primary" onclick="closeModal('mdEmail');toast('(Mockup) Email đã gửi qua SMTP Mắt Bão + lưu log gửi')">Gửi email</button></div>
+  </div>
+</div>
+
+<!-- ===================== MODAL TẠO ĐNTƯ ===================== -->
+<div class="modal-backdrop" id="mdDNTU">
+  <div class="modal">
+    <h2>Tạo Đề nghị tạm ứng (ĐNTƯ)</h2>
+    <div class="form-grid">
+      <label>Dự án<select><option>Nhà máy ABC – Bắc Ninh</option><option>Kho XYZ – Hải Phòng</option></select></label>
+      <label>Số tiền đề nghị (VNĐ)<input type="number" placeholder="0"></label>
+      <label>Ngày cần tiền<input type="date" value="2026-11-14"></label>
+    </div>
+    <label class="muted" style="display:block;margin-top:10px">Lý do tạm ứng<textarea placeholder="VD: Ứng chi phí vật tư và đi lại đợt thi công tuần tới"></textarea></label>
+    <p class="muted" style="margin-top:8px">Sau khi tạo, ĐNTƯ gửi tới kế toán xem xét trước khi gửi email đi (điểm mở — cần chốt ở Mục 8 của prompt).</p>
+    <div class="actions"><button class="btn btn-outline" onclick="closeModal('mdDNTU')">Hủy</button>
+      <button class="btn btn-primary" onclick="closeModal('mdDNTU');toast('(Mockup) Đã tạo ĐNTƯ và chuyển kế toán xem xét')">Tạo ĐNTƯ</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Dữ liệu mẫu (minh họa đúng nguyên tắc tiền Mục 7) ----------
+const fmt = n => n.toLocaleString('vi-VN');
+let expenses = [
+  {id:'KC001',date:'05/10/2026',nv:'Nguyễn Văn An',da:'Nhà máy ABC – Bắc Ninh',desc:'Thuê xe cẩu',amount:2500000,docs:'Đủ hồ sơ',approve:'Duyệt',settled:'ĐNHƯ-2026-01'},
+  {id:'KC002',date:'12/10/2026',nv:'Nguyễn Văn An',da:'Nhà máy ABC – Bắc Ninh',desc:'Mua vật tư phụ',amount:1200000,docs:'Đủ hồ sơ',approve:'Duyệt',settled:null},
+  {id:'KC003',date:'15/10/2026',nv:'Nguyễn Văn An',da:'Nhà máy ABC – Bắc Ninh',desc:'Ăn uống tiếp khách',amount:800000,docs:'Thiếu hóa đơn',approve:'Từ chối',settled:null},
+  {id:'KC004',date:'18/10/2026',nv:'Nguyễn Văn An',da:'Nhà máy ABC – Bắc Ninh',desc:'Vé tàu xe công tác',amount:3000000,docs:'Đủ hồ sơ',approve:'Duyệt',settled:null},
+  {id:'KC005',date:'20/10/2026',nv:'Trần Bình',da:'Kho XYZ – Hải Phòng',desc:'Thuê giàn giáo',amount:4500000,docs:'Đủ hồ sơ',approve:'Duyệt',settled:null},
+];
+let advances = [
+  {id:'TU001',date:'01/10/2026',nv:'Nguyễn Văn An',amount:10000000,note:'Ứng đợt 1 dự án ABC',booked:true},
+  {id:'TU002',date:'20/10/2026',nv:'Nguyễn Văn An',amount:5000000,note:'Ứng đợt 2 dự án ABC',booked:false},
+  {id:'TU003',date:'05/10/2026',nv:'Trần Bình',amount:8000000,note:'Ứng dự án XYZ',booked:true},
+];
+let dnhuList = [
+  {id:'ĐNHƯ-2026-01',title:'Giải trình chi phí T9–T10/2026',nv:'Nguyễn Văn An',period:'01/09 – 10/10',total:2500000,prevAdv:5000000,balance:7500000,status:'sent'},
+];
+let logs = [
+  {t:'10/10/2026 09:15',msg:'Kế toán tạo ĐNHƯ-2026-01 (Nguyễn Văn An) — 1 khoản chi, tổng 2.500.000 ₫ → đánh dấu Đã giải trình: KC001'},
+  {t:'10/10/2026 09:20',msg:'Kế toán đánh dấu TU001 Đã ghi sổ (thuộc chu trình ĐNHƯ-2026-01)'},
+  {t:'10/10/2026 09:25',msg:'Gửi ĐNHƯ-2026-01 tới an.nguyen@ctsvina.vn qua Mắt Bão — thành công'},
+];
+
+// ---------- Render ----------
+function renderChi(){
+  const f = document.getElementById('fChiNV').value;
+  document.getElementById('tbChi').innerHTML = expenses.filter(e=>!f||e.nv===f).map(e=>`
+    <tr><td>${e.id}</td><td>${e.date}</td><td>${e.nv}</td><td>${e.da}</td><td>${e.desc}</td>
+    <td class="num">${fmt(e.amount)}</td>
+    <td><span class="tag ${e.docs==='Đủ hồ sơ'?'tag-green':'tag-amber'}">${e.docs}</span></td>
+    <td><span class="tag ${e.approve==='Duyệt'?'tag-green':'tag-red'}">${e.approve}</span></td>
+    <td>${e.settled?`<span class="tag tag-blue">Đã giải trình · <a href="#" onclick="toast('(Mockup) Mở thư mục Drive của ${e.settled}');return false">${e.settled}</a></span>`:'<span class="tag tag-gray">Chưa giải trình</span>'}</td></tr>`).join('');
+}
+function renderTU(){
+  document.getElementById('tbTU').innerHTML = advances.map(a=>`
+    <tr><td>${a.id}</td><td>${a.date}</td><td>${a.nv}</td><td class="num">${fmt(a.amount)}</td><td>${a.note}</td>
+    <td>${a.booked?'<span class="tag tag-green">Đã ghi sổ</span>':'<span class="tag tag-amber">Chưa ghi sổ</span>'}</td>
+    <td>${a.booked?'':`<button class="btn btn-outline btn-sm" onclick="bookTU('${a.id}')">Ghi sổ</button>`}</td></tr>`).join('');
+}
+function bookTU(id){
+  if(!confirm('Xác nhận ghi sổ khoản tạm ứng '+id+'? Thao tác được lưu vết.'))return;
+  advances.find(a=>a.id===id).booked = true;
+  addLog(`Kế toán đánh dấu ${id} Đã ghi sổ`);
+  renderTU(); renderSo(); toast('Đã ghi sổ '+id+' — sổ thu chi chế độ "đã ghi sổ" tự cập nhật');
+}
+function renderSo(){
+  const nv = document.getElementById('fSoNV').value;
+  const bookedOnly = document.getElementById('toggleGhiSo').checked;
+  document.getElementById('toggleLabel').textContent = bookedOnly
+    ? 'Đang xem: Số dư đã ghi sổ (chỉ tạm ứng đã ghi sổ — khớp Số dư trong ĐNHƯ)'
+    : 'Đang xem: Số dư thực tế (toàn bộ tạm ứng)';
+  const advs = advances.filter(a=>a.nv===nv && (!bookedOnly||a.booked));
+  const exps = expenses.filter(e=>e.nv===nv && e.settled); // chỉ khoản đã giải trình vào sổ
+  const rows = [
+    ...advs.map(a=>({date:a.date,desc:`Tạm ứng ${a.id} — ${a.note}${a.booked?'':' (chưa ghi sổ)'}`,inAmt:a.amount,outAmt:0})),
+    ...exps.map(e=>({date:e.date,desc:`${e.desc} (${e.settled})`,inAmt:0,outAmt:e.amount})),
+  ].sort((x,y)=>x.date.split('/').reverse().join('').localeCompare(y.date.split('/').reverse().join('')));
+  let bal=0;
+  document.getElementById('tbSo').innerHTML = rows.map(r=>{bal+=r.inAmt-r.outAmt;return `
+    <tr><td>${r.date}</td><td>${r.desc}</td><td>${r.inAmt?'<span class="tag tag-blue">Tạm ứng</span>':'<span class="tag tag-gray">Khoản chi</span>'}</td>
+    <td class="num">${r.inAmt?fmt(r.inAmt):'—'}</td><td class="num">${r.outAmt?fmt(r.outAmt):'—'}</td><td class="num"><b>${fmt(bal)}</b></td></tr>`}).join('')
+    || '<tr><td colspan="6" class="muted">Không có dữ liệu</td></tr>';
+  const totalIn = rows.reduce((s,r)=>s+r.inAmt,0), totalOut = rows.reduce((s,r)=>s+r.outAmt,0);
+  document.getElementById('soTitle').textContent = `Sổ thu chi — ${nv}`;
+  document.getElementById('soKpis').innerHTML = `
+    <div class="kpi"><div class="label">Tổng tạm ứng${bookedOnly?' (đã ghi sổ)':' (gồm cả chưa ghi sổ)'}</div><div class="value">${fmt(totalIn)} ₫</div></div>
+    <div class="kpi"><div class="label">Tổng chi đã giải trình</div><div class="value">${fmt(totalOut)} ₫</div></div>
+    <div class="kpi hl"><div class="label">${bookedOnly?'Số dư đã ghi sổ':'Số dư thực tế'}</div><div class="value">${fmt(totalIn-totalOut)} ₫</div></div>`;
+}
+function renderDNHU(){
+  const st = {draft:['tag-gray','Nháp'],created:['tag-blue','Đã tạo'],sent:['tag-green','Đã gửi'],cancelled:['tag-red','Đã hủy']};
+  document.getElementById('tbDNHU').innerHTML = dnhuList.map(d=>`
+    <tr><td>${d.id}</td><td>${d.title}</td><td>${d.nv}</td><td>${d.period}</td>
+    <td class="num">${fmt(d.total)}</td><td class="num">${fmt(d.prevAdv)}</td><td class="num">${fmt(d.balance)}</td>
+    <td><span class="tag ${st[d.status][0]}">${st[d.status][1]}</span></td>
+    <td>${d.status==='cancelled'?'—':`<a href="#" onclick="toast('(Mockup) Mở file / thư mục Drive của ${d.id}');return false">Mở</a>`}</td>
+    <td>${d.status==='cancelled'?'':`<button class="btn btn-danger btn-sm" onclick="cancelDNHU('${d.id}')">Hủy</button>`}</td></tr>`).join('');
+}
+function cancelDNHU(id){
+  if(!confirm('Hủy '+id+'? Các khoản chi thuộc ĐNHƯ này sẽ quay về Chưa giải trình. ĐNHƯ được giữ lại để lưu vết.'))return;
+  dnhuList.find(d=>d.id===id).status='cancelled';
+  expenses.forEach(e=>{if(e.settled===id)e.settled=null});
+  addLog(`Kế toán HỦY ${id} — các khoản chi liên quan quay về Chưa giải trình`);
+  renderDNHU(); renderChi(); renderSo(); toast('Đã hủy '+id);
+}
+function addLog(msg){
+  logs.unshift({t:new Date().toLocaleString('vi-VN'),msg:'(Mockup) '+msg});
+  document.getElementById('logList').innerHTML = logs.map(l=>`<div class="log-item"><time>${l.t}</time>${l.msg}</div>`).join('');
+}
+
+// ---------- Wizard tạo ĐNHƯ ----------
+let dnhuCandidates = [];
+function openDNHU(){document.getElementById('mdDNHU').classList.add('open');dnhuBack();}
+function dnhuBack(){
+  document.getElementById('dnhuStep1').style.display='block';
+  document.getElementById('dnhuStep2').style.display='none';
+  document.getElementById('st1').classList.add('on');document.getElementById('st2').classList.remove('on');
+}
+function dnhuPreview(){
+  const nv = document.getElementById('dnhuNV').value;
+  const withRejected = document.getElementById('dnhuRejected').checked;
+  // Mockup: lấy khoản chưa giải trình của NV trong kỳ (bỏ qua so sánh ngày cho gọn minh họa)
+  dnhuCandidates = expenses.filter(e=>e.nv===nv && !e.settled && (withRejected||e.approve==='Duyệt'));
+  const totalApproved = dnhuCandidates.filter(e=>e.approve==='Duyệt').reduce((s,e)=>s+e.amount,0);
+  const prevAdv = advances.filter(a=>a.nv===nv && !a.booked).reduce((s,a)=>s+a.amount,0);
+  const balance = advances.filter(a=>a.nv===nv && a.booked).reduce((s,a)=>s+a.amount,0)
+                - expenses.filter(e=>e.nv===nv && e.settled).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('dnhuPrevRows').innerHTML = dnhuCandidates.map(e=>`
+    <tr><td>${e.date}</td><td>${e.desc}</td>
+    <td><span class="tag ${e.approve==='Duyệt'?'tag-green':'tag-red'}">${e.approve}</span></td>
+    <td class="num">${fmt(e.amount)}${e.approve==='Từ chối'?' <span class="muted">(không cộng)</span>':''}</td></tr>`).join('')
+    || '<tr><td colspan="4" class="muted">Không còn khoản chi chưa giải trình trong kỳ</td></tr>';
+  document.getElementById('dnhuSummary').innerHTML = `
+    <div class="row"><span>Tổng tiền hoàn ứng (chỉ khoản Duyệt)</span><b>${fmt(totalApproved)} ₫</b></div>
+    <div class="row"><span>Số tạm ứng trước <span class="muted">(tổng tạm ứng CHƯA ghi sổ)</span></span><b>${fmt(prevAdv)} ₫</b></div>
+    <div class="row"><span>Số dư tạm ứng <span class="muted">(đã giải trình + đã ghi sổ — không tính trùng với dòng trên)</span></span><b>${fmt(balance)} ₫</b></div>
+    <div class="row total"><span>Đối chiếu: khớp “Số dư đã ghi sổ” trong Sổ thu chi</span><span>✓</span></div>`;
+  document.getElementById('dnhuStep1').style.display='none';
+  document.getElementById('dnhuStep2').style.display='block';
+  document.getElementById('st1').classList.remove('on');document.getElementById('st2').classList.add('on');
+}
+function dnhuConfirm(){
+  const nv=document.getElementById('dnhuNV').value;
+  const id='ĐNHƯ-2026-'+String(dnhuList.length+1).padStart(2,'0');
+  const totalApproved=dnhuCandidates.filter(e=>e.approve==='Duyệt').reduce((s,e)=>s+e.amount,0);
+  const prevAdv=advances.filter(a=>a.nv===nv&&!a.booked).reduce((s,a)=>s+a.amount,0);
+  const balance=advances.filter(a=>a.nv===nv&&a.booked).reduce((s,a)=>s+a.amount,0)
+              - expenses.filter(e=>e.nv===nv&&e.settled).reduce((s,e)=>s+e.amount,0);
+  // Nguyên tắc 3: chỉ đánh dấu Đã giải trình SAU khi xuất file thành công (mockup: giả định thành công)
+  dnhuCandidates.forEach(e=>e.settled=id);
+  dnhuList.push({id,title:document.getElementById('dnhuTitle').value,nv,
+    period:document.getElementById('dnhuFrom').value+' – '+document.getElementById('dnhuTo').value,
+    total:totalApproved,prevAdv,balance,status:'created'});
+  addLog(`Kế toán tạo ${id} (${nv}) — xuất ${document.getElementById('dnhuType').value} → ${document.getElementById('dnhuDest').value} thành công → đánh dấu Đã giải trình: ${dnhuCandidates.map(e=>e.id).join(', ')}`);
+  closeModal('mdDNHU'); renderDNHU(); renderChi(); renderSo();
+  toast('Đã tạo '+id+' — file xuất thành công, các khoản chi đã đánh dấu Đã giải trình, sổ thu chi tự cập nhật');
+  switchTab('accTabs','p-dnhu');
+}
+
+// ---------- Modal / tab tiện ích ----------
+function openEmail(id){
+  document.getElementById('emailSubject').value='[CTS Vina] Đề nghị hoàn ứng '+id+' — Nguyễn Văn An';
+  document.getElementById('emailAttach').textContent=id+'.xlsx';
+  document.getElementById('mdEmail').classList.add('open');
+}
+function openDNTU(){document.getElementById('mdDNTU').classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',3500)}
+function setRole(r){
+  document.body.className='role-'+r;
+  document.getElementById('btnRoleAcc').classList.toggle('active',r==='acc');
+  document.getElementById('btnRoleEmp').classList.toggle('active',r==='emp');
+  document.getElementById('roleBadge').textContent='Vai trò: '+(r==='acc'?'Kế toán':'Nhân viên');
+}
+function switchTab(navId,panelId){
+  const nav=document.getElementById(navId);
+  nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.panel===panelId));
+  const root=nav.parentElement.querySelector('main');
+  root.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===panelId));
+}
+document.querySelectorAll('nav.tabs').forEach(nav=>
+  nav.addEventListener('click',e=>{if(e.target.dataset.panel)switchTab(nav.id,e.target.dataset.panel)}));
+document.querySelectorAll('.modal-backdrop').forEach(m=>
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+renderChi();renderTU();renderSo();renderDNHU();
+document.getElementById('logList').innerHTML=logs.map(l=>`<div class="log-item"><time>${l.t}</time>${l.msg}</div>`).join('');
+</script>
+</body>
+</html>
